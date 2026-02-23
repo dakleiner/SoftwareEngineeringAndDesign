@@ -1,0 +1,175 @@
+﻿#include <iostream>
+#include <string>
+#include <limits>
+#include <vector>
+#include <map>
+
+using namespace std;
+
+// Structure to represent a customer with their name and service type
+struct Customer {
+    string name;
+    int serviceType;  // 1 = Brokerage, 2 = Retirement
+};
+
+// Main class that manages the investment system, including authentication and customer data
+class InvestmentSystem {
+private:
+    vector<Customer> customers;           // List of all customers
+    string username;                       // Currently logged-in username
+    map<string, string> userDatabase;      // username -> password mapping
+
+public:
+    // Constructor: initializes customer list and user accounts
+    InvestmentSystem() {
+        // Initialize customers with sample data
+        customers = {
+            {"Bob Jones", 1},
+            {"Sarah Davis", 2},
+            {"Amy Friendly", 1},
+            {"Johnny Smith", 1},
+            {"Carol Spears", 2}
+        };
+
+        // Initialize user accounts (username -> password)
+        userDatabase["admin"] = "admin123";
+        userDatabase["manager"] = "manager456";
+        userDatabase["user"] = "user789";
+        userDatabase["test"] = "123";
+    }
+
+    // Authenticates a user by checking username and password against the database
+    // Returns true if authentication succeeds, false otherwise
+    bool authenticate() {
+        string inputPassword;
+
+        cout << "Enter username: ";
+        cin >> username;
+
+        cout << "Enter password: ";
+        cin >> inputPassword;
+
+        // Check if username exists in database
+        if (userDatabase.find(username) != userDatabase.end()) {
+            // Check if password matches
+            if (userDatabase[username] == inputPassword) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    // Displays all customer information and the currently logged-in user
+    void displayInfo() const {
+        cout << "\n--- Customer Information ---" << endl;
+        cout << "Logged in as: " << username << endl;
+		cout << "1 =  Brokerage  2 = Retirement" << endl;    
+        for (size_t i = 0; i < customers.size(); i++) {
+            cout << "Customer " << (i + 1) << ": "
+                << customers[i].name << " - Service Type: "
+                << customers[i].serviceType << endl;
+        }
+        cout << endl;
+    }
+
+    // Allows the user to change a customer's service type
+    // Validates input and updates the customer record
+    void changeCustomerService() {
+        int customerNumber, newService;
+
+        cout << "Which customer do you want to change? (1-"
+            << customers.size() << "): ";
+
+        if (!(cin >> customerNumber)) {
+            // Handle non-integer input
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Invalid input!" << endl;
+            return;
+        }
+
+        // Validate customer number is within valid range
+        if (customerNumber < 1 || customerNumber > static_cast<int>(customers.size())) {
+            cout << "Invalid customer number!" << endl;
+            return;
+        }
+
+        cout << "Enter new service number: ";
+        if (!(cin >> newService)) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            cout << "Invalid input!" << endl;
+            return;
+        }
+
+        // Update the customer's service type (adjust for 0-based indexing)
+        customers[customerNumber - 1].serviceType = newService;
+        cout << "Service updated successfully!" << endl;
+    }
+
+    // Displays the main menu and gets the user's choice
+    // Returns -1 if invalid input is provided
+    int getMenuChoice() {
+        int choice;
+
+        cout << "\n--- Main Menu ---" << endl;
+        cout << "1. Display Information" << endl;
+        cout << "2. Change Customer Choice" << endl;
+        cout << "3. Exit" << endl;
+        cout << "Enter your choice: ";
+
+        if (!(cin >> choice)) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            return -1;
+        }
+
+        return choice;
+    }
+};
+
+int main() {
+// Create the investment system instance
+InvestmentSystem system;
+
+cout << "Hello! Welcome to our Investment Company" << endl;
+    cout << "\n=== Available Accounts ===" << endl;
+    //cout << "admin / admin123" << endl;
+    //cout << "manager / manager456" << endl;
+    //cout << "user / user789" << endl;
+    //cout << "test / 123" << endl;
+    cout << "========================\n" << endl;
+
+    // Authentication loop - continue until user successfully logs in
+    while (!system.authenticate()) {
+        cout << "Access Denied! Invalid username or password.\n" << endl;
+    }
+
+    cout << "Access Granted!\n" << endl;
+
+    // Main program loop - display menu and process user choices until exit
+    int choice;
+    do {
+        choice = system.getMenuChoice();
+
+        switch (choice) {
+        case 1:  // Display customer information
+            system.displayInfo();
+            break;
+        case 2:  // Change a customer's service type
+            system.changeCustomerService();
+            break;
+        case 3:  // Exit the program
+            cout << "Exiting. Goodbye!" << endl;
+            break;
+        default:  // Handle invalid menu choices
+            cout << "Invalid option. Please select 1-3." << endl;
+        }
+
+    } while (choice != 3);
+
+    return 0;
+}
+
+// Compilation: g++ -o investment investment.cpp
